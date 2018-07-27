@@ -1,0 +1,63 @@
+version: '2'
+services:
+  # Default source code volumes
+  data:
+    image: busybox
+    container_name: ${PROJECT_NAME}_busybox
+    volumes:
+      - ./public:/var/www/public/html
+
+  nginx:
+    image: nginx
+    container_name: ${PROJECT_NAME}_webserver
+    volumes_from: [data]
+    volumes:
+      - ./docker/nginx/:/etc/nginx/conf.d
+    links:
+      - php-fpm
+    expose:
+      - "9000"
+    ports:
+      - "80:80"
+
+  # PHP compiler socker for webserver
+  php-fpm:
+    container_name: ${PROJECT_NAME}_php-fpm
+    build:
+      context: docker/php-fpm
+      dockerfile: Dockerfile
+    volumes_from: [data]
+    # volumes:
+    #   - ./docker/php-fpm/xdebug.ini /usr/local/etc/php/conf.d/
+    #   - ./docker/php-fpm/php-ini-overdrive.ini /usr/local/etc/php/conf.d/
+    environment:
+      PHP_IDE_CONFIG: "serverName=docker"
+      PHP_XDEBUG_ENABLED: 1 # Set 1 to enable.
+      XDEBUG_CONFIG: remote_host=192.168.99.100
+    ports:
+      - "9000:9000"
+
+  mysql:
+    image: mysql:5.7
+    container_name: ${PROJECT_NAME}_mysql
+    working_dir: /docker-entrypoint-initdb.d
+    volumes: 
+      - ./data:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=${PROJECT_NAME}
+      - MYSQL_DATABASE=${PROJECT_NAME}
+      - MYSQL_USER=${PROJECT_NAME}
+      - MYSQL_PASSWORD=${PROJECT_NAME}
+    ports:
+      - "8081:3306"
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - mysql:mysql
+    ports:
+      - 8082:80
+    environment:
+      - MYSQL_USERNAME=${PROJECT_NAME}
+      - MYSQL_ROOT_PASSWORD=${PROJECT_NAME}
+      - PMA_HOST=mysql
