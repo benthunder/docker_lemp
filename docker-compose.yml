@@ -5,7 +5,7 @@ services:
     image: busybox
     container_name: ${PROJECT_NAME}_busybox
     volumes:
-      - ./public:/var/www/public/html
+      - ./public:/var/www
 
   nginx:
     image: nginx
@@ -31,11 +31,11 @@ services:
     #   - ./docker/php-fpm/xdebug.ini /usr/local/etc/php/conf.d/
     #   - ./docker/php-fpm/php-ini-overdrive.ini /usr/local/etc/php/conf.d/
     environment:
-      PHP_IDE_CONFIG: "serverName=docker"
+      PHP_IDE_CONFIG: "serverName=lemp_container"
       PHP_XDEBUG_ENABLED: 1 # Set 1 to enable.
       XDEBUG_CONFIG: remote_host=192.168.99.100
     ports:
-      - "9000:9000"
+      - "12700:9000"
 
   mysql:
     image: mysql:5.7
@@ -49,14 +49,14 @@ services:
       - MYSQL_USER=${PROJECT_NAME}
       - MYSQL_PASSWORD=${PROJECT_NAME}
     ports:
-      - "8081:3306"
+      - "12701:3306"
   
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     links:
       - mysql:mysql
     ports:
-      - 8082:80
+      - 12702:80
     environment:
       - MYSQL_USERNAME=${PROJECT_NAME}
       - MYSQL_ROOT_PASSWORD=${PROJECT_NAME}

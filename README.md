@@ -8,3 +8,4 @@
 
 ##  Orther Infomation:
 *   ./vscode/launch.json -> debug file
+* create lemp_conatainer dir in public . This is document root .
